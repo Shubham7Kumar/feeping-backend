@@ -1,11 +1,9 @@
-
 const container = require("./container");
 const createMessageWorker = require("./modules/notifications/create-message-worker");
 
 const worker = createMessageWorker(container);
 
 const pollIntervalMs = 5000;
-
 
 let isShuttingDown = false;
 let shutdownResolve;
@@ -42,6 +40,12 @@ async function run() {
   console.log(`FeePing Worker started: ${worker.workerId}`);
 
   try {
+    const dbCheck = await container.pool.query("SELECT 1 AS connected");
+
+    if (dbCheck.rows[0]?.connected !== 1) {
+      throw new Error("Database connectivity check failed");
+    }
+    console.log("Worker database connection verified.");
     while (!isShuttingDown) {
       try {
         const results = await worker.processBatch();
