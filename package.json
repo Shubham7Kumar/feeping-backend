@@ -8,7 +8,10 @@
     "test": "jest --runInBand",
     "worker": "node src/worker.js",
     "migrate": "node scripts/migrate.js",
-    "migrate:test": "node scripts/migrate.js test"
+    "migrate:test": "node scripts/migrate.js test",
+    "migrate:staging": "node scripts/migrate.js staging",
+    "start:staging:api": "node scripts/start-staging.js api",
+    "start:staging:worker": "node scripts/start-staging.js worker"
   },
   "keywords": [],
   "author": "",

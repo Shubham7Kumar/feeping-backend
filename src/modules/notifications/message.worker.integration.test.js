@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const { randomUUID } = require("crypto");
 
-const createPool = require("../../infrastructure/database/createPool");
+const createTestPool = require("../../infrastructure/database/createTestPool");
 const MessageRepository = require("./message.repository");
 const ConsentRepository = require("./consent.repository");
 const InvoiceRepository = require("../invoices/invoice.repository");
@@ -28,13 +28,7 @@ describe("MessageWorker PostgreSQL integration", () => {
   const workerId = "worker-integration-test";
 
   beforeAll(() => {
-    if (!process.env.TEST_DATABASE_URL) {
-      throw new Error("TEST_DATABASE_URL is required");
-    }
-
-    pool = createPool(process.env.TEST_DATABASE_URL, {
-      ssl: false,
-    });
+    pool = createTestPool();
 
     messageRepository = new MessageRepository(pool);
     consentRepository = new ConsentRepository(pool);

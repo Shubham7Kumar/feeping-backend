@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const { randomUUID } = require("crypto");
 
-const createPool = require("../../infrastructure/database/createPool");
+const createTestPool = require("../../infrastructure/database/createTestPool");
 const TransactionManager = require("../../infrastructure/database/TransactionManager");
 
 const InvoiceRepository = require("./invoice.repository");
@@ -64,13 +64,7 @@ describe("InvoiceService PostgreSQL integration", () => {
   }
 
   beforeAll(() => {
-    if (!process.env.TEST_DATABASE_URL) {
-      throw new Error("TEST_DATABASE_URL is required");
-    }
-
-    pool = createPool(process.env.TEST_DATABASE_URL, {
-      ssl: false,
-    });
+    pool = createTestPool();
 
     invoiceRepository = new InvoiceRepository(pool);
     studentRepository = new StudentRepository(pool);

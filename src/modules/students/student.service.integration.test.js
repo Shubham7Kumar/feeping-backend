@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const { randomUUID } = require("crypto");
 
-const createPool = require("../../infrastructure/database/createPool");
+const createTestPool = require("../../infrastructure/database/createTestPool");
 const StudentRepository = require("./student.repository");
 const StudentService = require("./student.service");
 const TransactionManager = require("../../infrastructure/database/TransactionManager");
@@ -15,13 +15,7 @@ describe("StudentService PostgreSQL integration", () => {
   let otherOrganizationId;
 
   beforeAll(() => {
-    if (!process.env.TEST_DATABASE_URL) {
-      throw new Error("TEST_DATABASE_URL is required");
-    }
-
-    pool = createPool(process.env.TEST_DATABASE_URL, {
-      ssl: false,
-    });
+    pool = createTestPool();
 
     studentRepository = new StudentRepository(pool);
 

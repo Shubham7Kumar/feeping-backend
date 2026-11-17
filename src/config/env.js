@@ -9,6 +9,7 @@ const envSchema = z
 
     DATABASE_URL: z.string().min(1),
     TEST_DATABASE_URL: z.string().url().optional(),
+    STAGING_DATABASE_URL: z.string().url().optional(),
 
     FRONTEND_URL: z.string().url(),
 

@@ -1,5 +1,5 @@
 require("dotenv").config();
-const createPool = require("./createPool");
+const createTestPool = require("./createTestPool");
 const TransactionManager = require("./TransactionManager");
 
 describe("TransactionManager - PostgreSQL integration", () => {
@@ -7,13 +7,7 @@ describe("TransactionManager - PostgreSQL integration", () => {
   let transactionManager;
 
   beforeAll(() => {
-    if (!process.env.TEST_DATABASE_URL) {
-      throw new Error("TEST_DATABASE_URL is required");
-    }
-
-    pool = createPool(process.env.TEST_DATABASE_URL, {
-      ssl: false,
-    });
+    pool = createTestPool();
 
     transactionManager = new TransactionManager(pool);
   });

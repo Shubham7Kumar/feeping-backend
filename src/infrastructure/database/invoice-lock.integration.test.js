@@ -1,7 +1,7 @@
 
 require("dotenv").config();
 
-const createPool = require("./createPool");
+const createTestPool = require("./createTestPool");
 
 describe("PostgreSQL invoice row locking", () => {
   let pool;
@@ -11,13 +11,7 @@ describe("PostgreSQL invoice row locking", () => {
   let invoiceId;
 
   beforeAll(() => {
-    if (!process.env.TEST_DATABASE_URL) {
-      throw new Error("TEST_DATABASE_URL is required");
-    }
-
-    pool = createPool(process.env.TEST_DATABASE_URL, {
-      ssl: false,
-    });
+    pool = createTestPool();
   });
 
   afterAll(async () => {

@@ -1,9 +1,9 @@
-
 const fs = require("fs");
 const path = require("path");
 
 const env = require("../src/config/env");
 const createPool = require("../src/infrastructure/database/createPool");
+const createStagingPool = require("../src/infrastructure/database/createStagingPool");
 
 const MIGRATIONS_DIR = path.join(__dirname, "../migrations");
 const LOCK_KEY = 746501;
@@ -31,7 +31,7 @@ function createMigrationPool(target) {
       testUrl.pathname !== "/feeping_test_db"
     ) {
       throw new Error(
-        "Unsafe test database URL. Expected local feeping_test_db on port 5433."
+        "Unsafe test database URL. Expected local feeping_test_db on port 5433.",
       );
     }
 
@@ -42,11 +42,22 @@ function createMigrationPool(target) {
     });
   }
 
+  if (target === "staging") {
+    console.log("Migration target: Isolated staging database");
+    return createStagingPool();
+  }
+
   throw new Error(`Unknown migration target: ${target}`);
 }
 
 async function migrate() {
-  const target = process.argv[2] || "development";
+  const target = process.argv[2];
+
+  if (!target) {
+    throw new Error(
+      "Migration target required. Use: npm run migrate:test, npm run migrate:staging, or npm run migrate development",
+    );
+  }
 
   let pool;
   let client;
@@ -69,17 +80,14 @@ async function migrate() {
       )
     `);
 
-    const files = fs.readdirSync(MIGRATIONS_DIR)
-      .filter(file => file.endsWith(".sql"))
+    const files = fs
+      .readdirSync(MIGRATIONS_DIR)
+      .filter((file) => file.endsWith(".sql"))
       .sort();
 
-    const result = await client.query(
-      "SELECT filename FROM schema_migrations"
-    );
+    const result = await client.query("SELECT filename FROM schema_migrations");
 
-    const executed = new Set(
-      result.rows.map(row => row.filename)
-    );
+    const executed = new Set(result.rows.map((row) => row.filename));
 
     for (const filename of files) {
       if (executed.has(filename)) {
@@ -100,7 +108,7 @@ async function migrate() {
         await client.query(
           `INSERT INTO schema_migrations (filename)
            VALUES ($1)`,
-          [filename]
+          [filename],
         );
 
         await client.query("COMMIT");
@@ -119,15 +127,11 @@ async function migrate() {
     }
 
     console.log("Migrations completed.");
-
   } finally {
     if (client) {
       if (lockAcquired) {
         try {
-          await client.query(
-            "SELECT pg_advisory_unlock($1)",
-            [LOCK_KEY]
-          );
+          await client.query("SELECT pg_advisory_unlock($1)", [LOCK_KEY]);
         } catch (error) {
           destroyClient = true;
           console.error("Advisory unlock failed:", error.message);
@@ -143,7 +147,7 @@ async function migrate() {
   }
 }
 
-migrate().catch(error => {
+migrate().catch((error) => {
   console.error("Migration failed:", error.message);
   process.exitCode = 1;
 });
